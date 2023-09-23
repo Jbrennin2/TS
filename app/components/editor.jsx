@@ -31,8 +31,9 @@ export default function Editor() {
           rotation: 0, 
           scale: 1, 
           selected: false,
-          zIndex: images.length,  // new images will be on top by default
+          zIndex: images.length,  
           id: imgId,
+          name: file.name  // Save the file name
         }]);
         drawImages();
       };
@@ -40,7 +41,7 @@ export default function Editor() {
     };
 
     reader.readAsDataURL(file);
-  };
+}
 
   const drawImages = (currentlySelectedImageId = selectedImageId) => {
     const canvas = canvasRef.current;
@@ -252,37 +253,46 @@ const handleMouseMove = (event) => {
 
 return (
   <div className="flex bg-gray-600 outline">
-    <div className="flex flex-col items-center justify-center bg-gray-800 w-[20vw]">
-
-    <label className="cursor-pointer w-[20%] bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center">
-    <p>Upload Image</p>
-    <input 
-        type="file"
-        className="hidden"
-        onChange={handleImageUpload}
-    />
-</label>
+    <div className="flex flex-col bg-gray-800 w-[20vw]">
 
       {/* Images section */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="flex flex-col p-2 overflow-y-auto">
+        <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-2 rounded text-center">
+            <p>+</p>
+            <input 
+                type="file"
+                className="hidden"
+                onChange={handleImageUpload}
+            />
+        </label>
         {images.map(imageObj => (
-          <img 
+          <div 
             key={imageObj.id}
-            src={imageObj.img.src} 
-            className="w-20 h-20 object-cover cursor-pointer border-2 hover:border-blue-500" 
-            alt="Thumbnail"
+            className={`p-2 cursor-pointer mt-2 ${selectedImageId === imageObj.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-700 text-white'}`}
             onClick={() => {
               setSelectedImageId(imageObj.id);
-              drawImages(imageObj.id);  // Redraw canvas to update selection visually
+              drawImages(imageObj.id);
             }}
-          />
+          >
+            {imageObj.name}
+          </div>
         ))}
       </div>
 
       {selectedImageId !== null && (
+      <div className="mt-4">
+        <img src={images.find(img => img.id === selectedImageId).img.src} alt="Selected" style={{ maxWidth: '100%', height: 'auto' }} />
+      </div>
+    )}
+
+      {selectedImageId !== null && (
         <div className="mt-4">
-          <button onClick={() => changeZIndex(selectedImageId, 1)}>Bring Forward</button>
-          <button onClick={() => changeZIndex(selectedImageId, -1)}>Send Backward</button>
+          <button 
+            className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center mr-2" 
+            onClick={() => changeZIndex(selectedImageId, 1)}>Move Forward</button>
+          <button 
+            className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center" 
+            onClick={() => changeZIndex(selectedImageId, -1)}>Move Backward</button>
         </div>
       )}
     </div>
@@ -297,6 +307,7 @@ return (
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     />
+
   </div>
 );
 

@@ -4,12 +4,14 @@ import React, { useState, useRef } from "react";
 export default function Editor() {
   const canvasRef = useRef(null);
   const [images, setImages] = useState([]);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [selectedImageId, setSelectedImageId] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [selectedAction, setSelectedAction] = useState(null); // 'move', 'rotate', 'resize'
   const [initialRotation, setInitialRotation] = useState(0);
   const [initialScale, setInitialScale] = useState(1);
+  const [imageIdCounter, setImageIdCounter] = useState(0);  // Add this to the state
+
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -17,8 +19,21 @@ export default function Editor() {
 
     reader.onload = (e) => {
       const img = new Image();
+
+      const imgId = imageIdCounter;
+      setImageIdCounter(prevId => prevId + 1);
+
       img.onload = () => {
-        setImages([...images, { img, x: 0, y: 0, rotation: 0, scale: 1, selected: false }]);
+        setImages([...images, {
+          img, 
+          x: 0, 
+          y: 0, 
+          rotation: 0, 
+          scale: 1, 
+          selected: false,
+          zIndex: images.length,  // new images will be on top by default
+          id: imgId,
+        }]);
         drawImages();
       };
       img.src = e.target.result;
@@ -31,8 +46,11 @@ export default function Editor() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const sortedImages = [...images].sort((a, b) => a.zIndex - b.zIndex);
+
   
-    images.forEach((imageObj, index) => {
+    sortedImages.forEach((imageObj, index) => {
       const centerX = imageObj.x + imageObj.img.width * 0.5 * imageObj.scale;
       const centerY = imageObj.y + imageObj.img.height * 0.5 * imageObj.scale;
       ctx.save();
@@ -45,7 +63,7 @@ export default function Editor() {
         -imageObj.img.height * 0.5
       );
       
-      if (index === selectedImageIndex) {
+      if (imageObj.id === selectedImageId) {
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 2;
 
@@ -86,24 +104,26 @@ export default function Editor() {
     const canvasBounds = canvasRef.current.getBoundingClientRect();
     const mouseX = event.clientX - canvasBounds.left;
     const mouseY = event.clientY - canvasBounds.top;
-
-    const clickedImageIndex = images.findIndex(imageObj => {
-
-    const dx = mouseX - (imageObj.x + imageObj.img.width * 0.5 * imageObj.scale);
-    const dy = mouseY - (imageObj.y + imageObj.img.height * 0.5 * imageObj.scale);
-
-    const unrotatedX = dx * Math.cos(-imageObj.rotation) - dy * Math.sin(-imageObj.rotation);
-    const unrotatedY = dx * Math.sin(-imageObj.rotation) + dy * Math.cos(-imageObj.rotation);
+  
+    const clickedImage = images.find(imageObj => {
+      const dx = mouseX - (imageObj.x + imageObj.img.width * 0.5 * imageObj.scale);
+      const dy = mouseY - (imageObj.y + imageObj.img.height * 0.5 * imageObj.scale);
+  
+      const unrotatedX = dx * Math.cos(-imageObj.rotation) - dy * Math.sin(-imageObj.rotation);
+      const unrotatedY = dx * Math.sin(-imageObj.rotation) + dy * Math.cos(-imageObj.rotation);
+  
       return (
         unrotatedX > -imageObj.img.width * 0.5 * imageObj.scale &&
         unrotatedX < imageObj.img.width * 0.5 * imageObj.scale &&
         unrotatedY > -imageObj.img.height * 0.5 * imageObj.scale &&
         unrotatedY < imageObj.img.height * 0.5 * imageObj.scale
-    );
+      );
     });
 
-    if (clickedImageIndex !== -1) {
-        const clickedImage = images[clickedImageIndex];
+    setSelectedImageId(clickedImage? clickedImage.id : null);
+
+
+    if (clickedImage) {
 
         const centerX = clickedImage.x + clickedImage.img.width * 0.5 * clickedImage.scale;
         const centerY = clickedImage.y + clickedImage.img.height * 0.5 * clickedImage.scale;
@@ -116,18 +136,18 @@ export default function Editor() {
         const unrotatedY = dx * Math.sin(-clickedImage.rotation) + dy * Math.cos(-clickedImage.rotation);
 
         // The scaling handle's position in unrotated coordinates, scaled appropriately
-const scalingHandleX = clickedImage.img.width * 0.5 * clickedImage.scale - 10 * clickedImage.scale;
-const scalingHandleY = clickedImage.img.height * 0.5 * clickedImage.scale - 10 * clickedImage.scale;
+        const scalingHandleX = clickedImage.img.width * 0.5 * clickedImage.scale - 10 * clickedImage.scale;
+        const scalingHandleY = clickedImage.img.height * 0.5 * clickedImage.scale - 10 * clickedImage.scale;
 
-const dxScaleHandle = unrotatedX - scalingHandleX;
-const dyScaleHandle = unrotatedY - scalingHandleY;
+        const dxScaleHandle = unrotatedX - scalingHandleX;
+        const dyScaleHandle = unrotatedY - scalingHandleY;
 
-const scalingHandleDist = Math.sqrt(dxScaleHandle**2 + dyScaleHandle**2);
+        const scalingHandleDist = Math.sqrt(dxScaleHandle**2 + dyScaleHandle**2);
 
 
         setDragOffset({ x: mouseX - clickedImage.x, y: mouseY - clickedImage.y });
 
-        setSelectedImageIndex(clickedImageIndex);
+        setSelectedImageId(clickedImage.id);
         setIsDragging(true);
 
         // The rotation handle's position in unrotated coordinates, scaled appropriately
@@ -145,8 +165,6 @@ const scalingHandleDist = Math.sqrt(dxScaleHandle**2 + dyScaleHandle**2);
             (unrotatedY - clickedImage.img.height * 0.5 * clickedImage.scale + 10)**2
         );
 
-        console.log('ROTATION HANDLE DIST', rotationHandleDist)
-        console.log('BOTTOM RIGHT HANDLE DIST', scalingHandleDist)
 
         if (rotationHandleDist <= 10 * clickedImage.scale) {
             setSelectedAction('rotate');
@@ -163,69 +181,93 @@ const scalingHandleDist = Math.sqrt(dxScaleHandle**2 + dyScaleHandle**2);
 
 
 
-  const handleMouseMove = (event) => {
-    if (!isDragging || selectedImageIndex === null) return;
-  
-    const canvasBounds = canvasRef.current.getBoundingClientRect();
-    const mouseX = event.clientX - canvasBounds.left;
-    const mouseY = event.clientY - canvasBounds.top;
-    const clickedImage = images[selectedImageIndex];
-    const centerX = clickedImage.x + clickedImage.img.width * 0.5 * clickedImage.scale;
-    const centerY = clickedImage.y + clickedImage.img.height * 0.5 * clickedImage.scale;
-  
-    if (selectedAction === 'move') {
-      const x = event.clientX - canvasBounds.left - dragOffset.x;
-      const y = event.clientY - canvasBounds.top - dragOffset.y;
-  
-      const newImages = [...images];
-      newImages[selectedImageIndex].x = x;
-      newImages[selectedImageIndex].y = y;
-      setImages(newImages);
-    } else if (selectedAction === 'rotate') {
-      const dx = mouseX - centerX;
-      const dy = mouseY - centerY;
-      const angle = Math.atan2(dy, dx);
-      const newImages = [...images];
-      newImages[selectedImageIndex].rotation = angle - initialRotation;
-      setImages(newImages);
-    } else if (selectedAction === 'resize') {
-      const dx = mouseX - centerX;
-      const dy = mouseY - centerY;
-      const currentDiagonalDistance = Math.sqrt(dx**2 + dy**2);
-      
-      const originalDistanceX = clickedImage.img.width * 0.5 * initialScale;
-      const originalDistanceY = clickedImage.img.height * 0.5 * initialScale;
-      const originalDiagonalDistance = Math.sqrt(originalDistanceX**2 + originalDistanceY**2);
-      
-      const scale = initialScale * (currentDiagonalDistance / originalDiagonalDistance);
-      
-      if (scale > 0) { // prevent negative scaling
-        const newImages = [...images];
-        newImages[selectedImageIndex].scale = scale;
-        setImages(newImages);
-      }
-    }
+const handleMouseMove = (event) => {
+  if (!isDragging || selectedImageId === null) return;
+
+  const canvasBounds = canvasRef.current.getBoundingClientRect();
+  const mouseX = event.clientX - canvasBounds.left;
+  const mouseY = event.clientY - canvasBounds.top;
+
+  const newImages = [...images];
+  const clickedImageIndex = newImages.findIndex(img => img.id === selectedImageId);
+  const clickedImage = newImages[clickedImageIndex];
+  const centerX = clickedImage.x + clickedImage.img.width * 0.5 * clickedImage.scale;
+  const centerY = clickedImage.y + clickedImage.img.height * 0.5 * clickedImage.scale;
+
+  if (selectedAction === 'move') {
+    const x = event.clientX - canvasBounds.left - dragOffset.x;
+    const y = event.clientY - canvasBounds.top - dragOffset.y;
+    newImages[clickedImageIndex].x = x;
+    newImages[clickedImageIndex].y = y;
     
-  
-    drawImages();
-  };
+  } else if (selectedAction === 'rotate') {
+    const dx = mouseX - centerX;
+    const dy = mouseY - centerY;
+    const angle = Math.atan2(dy, dx);
+    newImages[clickedImageIndex].rotation = angle - initialRotation;
+    
+  } else if (selectedAction === 'resize') {
+    const dx = mouseX - centerX;
+    const dy = mouseY - centerY;
+    const currentDiagonalDistance = Math.sqrt(dx**2 + dy**2);
+    
+    const originalDistanceX = clickedImage.img.width * 0.5 * initialScale;
+    const originalDistanceY = clickedImage.img.height * 0.5 * initialScale;
+    const originalDiagonalDistance = Math.sqrt(originalDistanceX**2 + originalDistanceY**2);
+    
+    const scale = initialScale * (currentDiagonalDistance / originalDiagonalDistance);
+    
+    if (scale > 0) { // prevent negative scaling
+      newImages[clickedImageIndex].scale = scale;
+    }
+  }
+
+  setImages(newImages);
+  drawImages();
+};
 
   const handleMouseUp = () => {
     setIsDragging(false);
     setSelectedAction(null);
   };
 
+
+  const changeZIndex = (id, direction) => {
+    const newImages = [...images];
+    const index = newImages.findIndex(img => img.id === id);
+
+    if (direction === 1 && newImages[index].zIndex === newImages.length - 1) return; 
+    if (direction === -1 && newImages[index].zIndex === 0) return;
+
+    const targetIndex = newImages.findIndex(img => img.zIndex === newImages[index].zIndex + direction);
+
+    // Swap the zIndex values
+    newImages[index].zIndex += direction;
+    newImages[targetIndex].zIndex -= direction;
+
+    setImages(newImages);
+    drawImages();
+};
+
   return (
-    <div className="flex bg-red-400">
+    <div className="flex bg-gray-600 outline">
       <div className="flex flex-col items-center justify-center">
         <input 
-          className="w-[75%]"
-          type="file" onChange={handleImageUpload} />
+          className="w-[75%] mb-4"
+          type="file" onChange={handleImageUpload} 
+        />
+
+        {selectedImageId !== null && (
+          <div>
+            <button onClick={() => changeZIndex(selectedImageId, 1)}>Bring Forward</button>
+            <button onClick={() => changeZIndex(selectedImageId, -1)}>Send Backward</button>
+          </div>
+        )}
       </div>
       <canvas
         ref={canvasRef}
-        width={1180}
-        height={1062}
+        width={944}
+        height={849.6}
         style={{ backgroundColor: 'white' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -234,4 +276,4 @@ const scalingHandleDist = Math.sqrt(dxScaleHandle**2 + dyScaleHandle**2);
       />
     </div>
   );
-};
+}

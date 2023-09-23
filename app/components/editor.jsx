@@ -111,7 +111,7 @@ export default function Editor() {
   
       const unrotatedX = dx * Math.cos(-imageObj.rotation) - dy * Math.sin(-imageObj.rotation);
       const unrotatedY = dx * Math.sin(-imageObj.rotation) + dy * Math.cos(-imageObj.rotation);
-  
+        
       return (
         unrotatedX > -imageObj.img.width * 0.5 * imageObj.scale &&
         unrotatedX < imageObj.img.width * 0.5 * imageObj.scale &&

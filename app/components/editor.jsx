@@ -70,8 +70,8 @@ export default function Editor() {
         // Draw bottom-right resize handle
         ctx.beginPath();
         ctx.arc(
-          imageObj.img.width * 0.5,
-          imageObj.img.height * 0.5,
+          imageObj.img.width * 0.5 - 10,
+          imageObj.img.height * 0.5 - 10,
           10, 0, 2 * Math.PI
         );
         ctx.fillStyle = 'green';
@@ -88,12 +88,18 @@ export default function Editor() {
     const mouseY = event.clientY - canvasBounds.top;
 
     const clickedImageIndex = images.findIndex(imageObj => {
-        return (
-            mouseX > imageObj.x &&
-            mouseX < imageObj.x + imageObj.img.width * imageObj.scale &&
-            mouseY > imageObj.y &&
-            mouseY < imageObj.y + imageObj.img.height * imageObj.scale
-        );
+
+    const dx = mouseX - (imageObj.x + imageObj.img.width * 0.5 * imageObj.scale);
+    const dy = mouseY - (imageObj.y + imageObj.img.height * 0.5 * imageObj.scale);
+
+    const unrotatedX = dx * Math.cos(-imageObj.rotation) - dy * Math.sin(-imageObj.rotation);
+    const unrotatedY = dx * Math.sin(-imageObj.rotation) + dy * Math.cos(-imageObj.rotation);
+      return (
+        unrotatedX > -imageObj.img.width * 0.5 * imageObj.scale &&
+        unrotatedX < imageObj.img.width * 0.5 * imageObj.scale &&
+        unrotatedY > -imageObj.img.height * 0.5 * imageObj.scale &&
+        unrotatedY < imageObj.img.height * 0.5 * imageObj.scale
+    );
     });
 
     if (clickedImageIndex !== -1) {
@@ -109,33 +115,44 @@ export default function Editor() {
         const unrotatedX = dx * Math.cos(-clickedImage.rotation) - dy * Math.sin(-clickedImage.rotation);
         const unrotatedY = dx * Math.sin(-clickedImage.rotation) + dy * Math.cos(-clickedImage.rotation);
 
+        // The scaling handle's position in unrotated coordinates, scaled appropriately
+const scalingHandleX = clickedImage.img.width * 0.5 * clickedImage.scale - 10 * clickedImage.scale;
+const scalingHandleY = clickedImage.img.height * 0.5 * clickedImage.scale - 10 * clickedImage.scale;
+
+const dxScaleHandle = unrotatedX - scalingHandleX;
+const dyScaleHandle = unrotatedY - scalingHandleY;
+
+const scalingHandleDist = Math.sqrt(dxScaleHandle**2 + dyScaleHandle**2);
+
+
         setDragOffset({ x: mouseX - clickedImage.x, y: mouseY - clickedImage.y });
 
         setSelectedImageIndex(clickedImageIndex);
         setIsDragging(true);
 
-// The rotation handle's position in unrotated coordinates, scaled appropriately
-const rotationHandleX = 0;
-const rotationHandleY = -clickedImage.img.height * 0.5 * clickedImage.scale + 10 * clickedImage.scale; 
+        // The rotation handle's position in unrotated coordinates, scaled appropriately
+        const rotationHandleX = 0;
+        const rotationHandleY = -clickedImage.img.height * 0.5 * clickedImage.scale + 10 * clickedImage.scale; 
 
-// Distance between the unrotated mouse position and the rotation handle
-const dxHandle = unrotatedX - rotationHandleX;
-const dyHandle = unrotatedY - rotationHandleY;
+        // Distance between the unrotated mouse position and the rotation handle
+        const dxHandle = unrotatedX - rotationHandleX;
+        const dyHandle = unrotatedY - rotationHandleY;
 
-const rotationHandleDist = Math.sqrt(dxHandle**2 + dyHandle**2);
+        const rotationHandleDist = Math.sqrt(dxHandle**2 + dyHandle**2);
        
         const bottomRightHandleDist = Math.sqrt(
-            (unrotatedX - clickedImage.img.width * 0.5 * clickedImage.scale)**2 + 
-            (unrotatedY - clickedImage.img.height * 0.5 * clickedImage.scale)**2
+            (unrotatedX - clickedImage.img.width * 0.5 * clickedImage.scale + 10)**2 + 
+            (unrotatedY - clickedImage.img.height * 0.5 * clickedImage.scale + 10)**2
         );
+
         console.log('ROTATION HANDLE DIST', rotationHandleDist)
-        console.log('BOTTOM RIGHT HANDLE DIST', bottomRightHandleDist)
+        console.log('BOTTOM RIGHT HANDLE DIST', scalingHandleDist)
 
         if (rotationHandleDist <= 10 * clickedImage.scale) {
             setSelectedAction('rotate');
             const angle = Math.atan2(dy, dx);
             setInitialRotation(angle - clickedImage.rotation);  // Set the initial rotation
-        } else if (bottomRightHandleDist <= 100) {
+        } else if (scalingHandleDist <= 10 * clickedImage.scale) {
           setSelectedAction('resize');
           setInitialScale(clickedImage.scale); // store the initial scale
         } else {

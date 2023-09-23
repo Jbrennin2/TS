@@ -9,6 +9,7 @@ export default function Editor() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [selectedAction, setSelectedAction] = useState(null); // 'move', 'rotate', 'resize'
   const [initialRotation, setInitialRotation] = useState(0);
+  const [initialScale, setInitialScale] = useState(1);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -60,7 +61,7 @@ export default function Editor() {
         ctx.beginPath();
         ctx.arc(
           0,
-          -imageObj.img.height * 0.5,
+          -imageObj.img.height * 0.5 + 10,
           10, 0, 2 * Math.PI
         );
         ctx.fillStyle = 'red';
@@ -113,18 +114,30 @@ export default function Editor() {
         setSelectedImageIndex(clickedImageIndex);
         setIsDragging(true);
 
-        const rotationHandleDist = Math.sqrt(unrotatedX**2 + (unrotatedY + clickedImage.img.height * 0.5 * clickedImage.scale)**2);
+// The rotation handle's position in unrotated coordinates, scaled appropriately
+const rotationHandleX = 0;
+const rotationHandleY = -clickedImage.img.height * 0.5 * clickedImage.scale + 10 * clickedImage.scale; 
+
+// Distance between the unrotated mouse position and the rotation handle
+const dxHandle = unrotatedX - rotationHandleX;
+const dyHandle = unrotatedY - rotationHandleY;
+
+const rotationHandleDist = Math.sqrt(dxHandle**2 + dyHandle**2);
+       
         const bottomRightHandleDist = Math.sqrt(
             (unrotatedX - clickedImage.img.width * 0.5 * clickedImage.scale)**2 + 
             (unrotatedY - clickedImage.img.height * 0.5 * clickedImage.scale)**2
         );
+        console.log('ROTATION HANDLE DIST', rotationHandleDist)
+        console.log('BOTTOM RIGHT HANDLE DIST', bottomRightHandleDist)
 
-        if (rotationHandleDist <= 10) {
+        if (rotationHandleDist <= 10 * clickedImage.scale) {
             setSelectedAction('rotate');
             const angle = Math.atan2(dy, dx);
             setInitialRotation(angle - clickedImage.rotation);  // Set the initial rotation
-        } else if (bottomRightHandleDist <= 10) {
-            setSelectedAction('resize');
+        } else if (bottomRightHandleDist <= 100) {
+          setSelectedAction('resize');
+          setInitialScale(clickedImage.scale); // store the initial scale
         } else {
             setSelectedAction('move');
         }
@@ -159,14 +172,23 @@ export default function Editor() {
       newImages[selectedImageIndex].rotation = angle - initialRotation;
       setImages(newImages);
     } else if (selectedAction === 'resize') {
-      const distanceFromCenter = Math.sqrt((centerX - mouseX)**2 + (centerY - mouseY)**2);
-      const originalDistance = clickedImage.img.width * 0.5;
-      const scale = distanceFromCenter / originalDistance;
-  
-      const newImages = [...images];
-      newImages[selectedImageIndex].scale = scale;
-      setImages(newImages);
+      const dx = mouseX - centerX;
+      const dy = mouseY - centerY;
+      const currentDiagonalDistance = Math.sqrt(dx**2 + dy**2);
+      
+      const originalDistanceX = clickedImage.img.width * 0.5 * initialScale;
+      const originalDistanceY = clickedImage.img.height * 0.5 * initialScale;
+      const originalDiagonalDistance = Math.sqrt(originalDistanceX**2 + originalDistanceY**2);
+      
+      const scale = initialScale * (currentDiagonalDistance / originalDiagonalDistance);
+      
+      if (scale > 0) { // prevent negative scaling
+        const newImages = [...images];
+        newImages[selectedImageIndex].scale = scale;
+        setImages(newImages);
+      }
     }
+    
   
     drawImages();
   };

@@ -280,13 +280,13 @@ return (
       </div>
 
       {selectedImageId !== null && (
-      <div className="mt-4">
-        <img src={images.find(img => img.id === selectedImageId).img.src} alt="Selected" style={{ maxWidth: '100%', height: 'auto' }} />
-      </div>
-    )}
+        <div className="mt-4 border w-full max-h-[20%] flex justify-center items-center">
+          <img src={images.find(img => img.id === selectedImageId).img.src} alt="Selected" style={{ height: '100%', maxWidth: 'none' }} />
+        </div>
+      )}
 
       {selectedImageId !== null && (
-        <div className="mt-4">
+        <div className="mt-4 flex justify-center">
           <button 
             className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center mr-2" 
             onClick={() => changeZIndex(selectedImageId, 1)}>Move Forward</button>

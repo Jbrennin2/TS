@@ -252,11 +252,16 @@ const handleMouseMove = (event) => {
 
 return (
   <div className="flex bg-gray-600 outline">
-    <div className="flex flex-col items-center justify-center">
-      <input 
-        className="w-[75%] mb-4"
-        type="file" onChange={handleImageUpload} 
-      />
+    <div className="flex flex-col items-center justify-center bg-gray-800 w-[20vw]">
+
+    <label className="cursor-pointer w-[20%] bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center">
+    <p>Upload Image</p>
+    <input 
+        type="file"
+        className="hidden"
+        onChange={handleImageUpload}
+    />
+</label>
 
       {/* Images section */}
       <div className="grid grid-cols-3 gap-2">

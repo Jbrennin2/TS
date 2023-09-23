@@ -42,7 +42,7 @@ export default function Editor() {
     reader.readAsDataURL(file);
   };
 
-  const drawImages = () => {
+  const drawImages = (currentlySelectedImageId = selectedImageId) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -63,7 +63,7 @@ export default function Editor() {
         -imageObj.img.height * 0.5
       );
       
-      if (imageObj.id === selectedImageId) {
+      if (imageObj.id === currentlySelectedImageId) {
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 2;
 
@@ -249,31 +249,50 @@ const handleMouseMove = (event) => {
     drawImages();
 };
 
-  return (
-    <div className="flex bg-gray-600 outline">
-      <div className="flex flex-col items-center justify-center">
-        <input 
-          className="w-[75%] mb-4"
-          type="file" onChange={handleImageUpload} 
-        />
 
-        {selectedImageId !== null && (
-          <div>
-            <button onClick={() => changeZIndex(selectedImageId, 1)}>Bring Forward</button>
-            <button onClick={() => changeZIndex(selectedImageId, -1)}>Send Backward</button>
-          </div>
-        )}
-      </div>
-      <canvas
-        ref={canvasRef}
-        width={944}
-        height={849.6}
-        style={{ backgroundColor: 'white' }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+return (
+  <div className="flex bg-gray-600 outline">
+    <div className="flex flex-col items-center justify-center">
+      <input 
+        className="w-[75%] mb-4"
+        type="file" onChange={handleImageUpload} 
       />
+
+      {/* Images section */}
+      <div className="grid grid-cols-3 gap-2">
+        {images.map(imageObj => (
+          <img 
+            key={imageObj.id}
+            src={imageObj.img.src} 
+            className="w-20 h-20 object-cover cursor-pointer border-2 hover:border-blue-500" 
+            alt="Thumbnail"
+            onClick={() => {
+              setSelectedImageId(imageObj.id);
+              drawImages(imageObj.id);  // Redraw canvas to update selection visually
+            }}
+          />
+        ))}
+      </div>
+
+      {selectedImageId !== null && (
+        <div className="mt-4">
+          <button onClick={() => changeZIndex(selectedImageId, 1)}>Bring Forward</button>
+          <button onClick={() => changeZIndex(selectedImageId, -1)}>Send Backward</button>
+        </div>
+      )}
     </div>
-  );
+    
+    <canvas
+      ref={canvasRef}
+      width={944}
+      height={849.6}
+      style={{ backgroundColor: 'white' }}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    />
+  </div>
+);
+
 }

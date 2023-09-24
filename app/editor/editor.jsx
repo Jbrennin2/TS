@@ -274,8 +274,6 @@ const getImage = () => {
 };
 
 const saveImage = async () => {
-
-  // Get the base64 encoded image data
   const base64 = getImage();
 
   // Convert Base64 to Uint8Array (binary)
@@ -287,7 +285,7 @@ const saveImage = async () => {
   const byteArray = new Uint8Array(byteNumbers);
 
   // Generate a pre-signed URL for the file upload
-  const presignedUrl = await fetch('/api/avatar/upload', {
+  const presignedUrl = await fetch('/api/upload', {
     method: 'POST',
     body: JSON.stringify({
       filename: 'my-image.png',
@@ -303,7 +301,7 @@ const saveImage = async () => {
 
   // Set the saved URL
   setSavedURL(blob.url);
-  console.log(blob.url)
+  console.log(blob);
 };
 
 

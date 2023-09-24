@@ -272,7 +272,6 @@ const getImage = () => {
 };
 
 const saveImage = async () => {
-
   const base64 = getImage();
 
   // Convert Base64 to Uint8Array (binary)
@@ -283,12 +282,20 @@ const saveImage = async () => {
   }
   const byteArray = new Uint8Array(byteNumbers);
 
-  // Upload the binary data to Vercel Blob
-  const blob = await put('my-image.png', byteArray.buffer, { access: 'public' });
+  // POST the binary data to /api/upload
+  const response = await fetch(`/api/upload?filename=my-image.png`, {
+    method: 'POST',
+    body: byteArray.buffer,
+    headers: {
+      'Content-Type': 'application/octet-stream'
+    }
+  });
 
+  const blob = await response.json();
+  
   // Set the saved URL
-  setSavedURL(blob);
   console.log(blob);
+  setSavedURL(blob);
 };
 
 

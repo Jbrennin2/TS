@@ -1,6 +1,8 @@
 "use client"
 import React, { useState, useRef, useEffect } from "react";
 import { put } from '@vercel/blob';
+import { upload } from '@vercel/blob/client';
+
 
 
 import Link from 'next/link';
@@ -272,23 +274,36 @@ const getImage = () => {
 };
 
 const saveImage = async () => {
-console.log(process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN)
+
+  // Get the base64 encoded image data
   const base64 = getImage();
 
   // Convert Base64 to Uint8Array (binary)
   const byteCharacters = atob(base64);
   const byteNumbers = new Array(byteCharacters.length);
   for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
   }
   const byteArray = new Uint8Array(byteNumbers);
 
-  // Upload the binary data to Vercel Blob
-  const blob = await put('my-image.png', byteArray.buffer, { access: 'public' });
+  // Generate a pre-signed URL for the file upload
+  const presignedUrl = await fetch('/api/avatar/upload', {
+    method: 'POST',
+    body: JSON.stringify({
+      filename: 'my-image.png',
+      contentType: 'image/png',
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+    }),
+  }).then((response) => response.json());
+
+  // Upload the binary data to Vercel Blob using the pre-signed URL
+  const blob = await upload(presignedUrl, byteArray.buffer, {
+    access: 'public',
+  });
 
   // Set the saved URL
-  setSavedURL(blob);
-  console.log(blob);
+  setSavedURL(blob.url);
+  console.log(blob.url)
 };
 
 

@@ -1,5 +1,7 @@
 "use client"
 import React, { useState, useRef, useEffect } from "react";
+import { put } from '@vercel/blob';
+
 
 import Link from 'next/link';
 
@@ -13,7 +15,7 @@ export default function Editor() {
   const [initialRotation, setInitialRotation] = useState(0);
   const [initialScale, setInitialScale] = useState(1);
   const [imageIdCounter, setImageIdCounter] = useState(0);  // Add this to the state
-  const [savedURL, setSavedURL] = useState('yest');
+  const [savedURL, setSavedURL] = useState(null);
 
   useEffect(() => {
     if (selectedImageId === null) {
@@ -263,14 +265,32 @@ const getImage = () => {
   setSelectedImageId(null);
   const canvas = canvasRef.current;
   const dataURL = canvas.toDataURL();
-  return dataURL;
+
+  // Extract only the Base64 part
+  const base64Image = dataURL.split(',')[1];
+  return base64Image;
 };
 
+const saveImage = async () => {
+  process.env.BLOB_READ_WRITE_TOKEN = process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN
 
-const saveImage = () => { 
-  const URL = getImage();
-  setSavedURL(URL.toString())
-}
+  const base64 = getImage();
+
+  // Convert Base64 to Uint8Array (binary)
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+
+  // Upload the binary data to Vercel Blob
+  const blob = await put('my-image.png', byteArray.buffer, { access: 'public' });
+
+  // Set the saved URL
+  setSavedURL(blob);
+  console.log(blob);
+};
 
 
 

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@pixi/loaders": "^6.5.10",
+    "@vercel/blob": "^0.12.5",
     "autoprefixer": "10.4.16",
     "eslint": "8.49.0",
     "eslint-config-next": "13.5.2",

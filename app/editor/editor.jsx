@@ -1,5 +1,7 @@
 "use client"
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+
+import Link from 'next/link';
 
 export default function Editor() {
   const canvasRef = useRef(null);
@@ -11,6 +13,13 @@ export default function Editor() {
   const [initialRotation, setInitialRotation] = useState(0);
   const [initialScale, setInitialScale] = useState(1);
   const [imageIdCounter, setImageIdCounter] = useState(0);  // Add this to the state
+  const [savedURL, setSavedURL] = useState('yest');
+
+  useEffect(() => {
+    if (selectedImageId === null) {
+      drawImages();
+    }
+  }, [selectedImageId]);
 
 
   const handleImageUpload = (event) => {
@@ -250,6 +259,20 @@ const handleMouseMove = (event) => {
     drawImages();
 };
 
+const getImage = () => {
+  setSelectedImageId(null);
+  const canvas = canvasRef.current;
+  const dataURL = canvas.toDataURL();
+  return dataURL;
+};
+
+
+const saveImage = () => { 
+  const URL = getImage();
+  setSavedURL(URL.toString())
+}
+
+
 
 return (
   <div className="flex bg-gray-600 outline">
@@ -258,7 +281,7 @@ return (
       {/* Images section */}
       <div className="flex flex-col p-2 overflow-y-auto">
         <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-2 rounded text-center">
-            <p>+</p>
+            <p>Add Image</p>
             <input 
                 type="file"
                 className="hidden"
@@ -295,6 +318,18 @@ return (
             onClick={() => changeZIndex(selectedImageId, -1)}>Move Backward</button>
         </div>
       )}
+
+
+      <button className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center mt-4" onClick={saveImage}>
+        <p>Save Design</p>
+      </button>
+      {savedURL ? (
+      <div className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center mt-4">
+        <Link href={`/finalize?image=1`}>Finalize Design</Link>
+      </div>
+      ) : (<></>)}
+
+
     </div>
     
     <canvas

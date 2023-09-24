@@ -12,10 +12,9 @@ export default function Banner({setEditor, editor, setBanner, banner}) {
             <p>Start Customizing your Acrylic Art today!</p>
         </div>
         <div className="flex flex-col items-center justify-evenly h-full w-[50%]">
-            <button
-             className="border-2 bg-blue-400 rounded-full px-10 py-2"
-             onClick={openEditor}
-            >Get Started</button>
+        <nav>
+          <a href="/editor">Editor</a>
+        </nav>
         </div>
       </div>
     )

@@ -2,8 +2,9 @@
 import Image from 'next/image'
 import Header from './components/header'
 import Banner from './components/banner'
-import Editor from './components/editor'
 import { useState } from 'react'
+import { useRouter } from 'next/router';
+
 
 export default function Home() {
 
@@ -17,7 +18,6 @@ export default function Home() {
     <main className="flex flex-col items-center justify-evenly min-h-screen bg-gray-100">
       <Header/>
       {banner ? <Banner setEditor={setEditor} editor={editor} setBanner={setBanner} banner={banner} /> : <></>}
-      {editor ? <Editor/> : null}
     </main>
   )
 }

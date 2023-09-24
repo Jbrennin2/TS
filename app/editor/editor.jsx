@@ -272,8 +272,7 @@ const getImage = () => {
 };
 
 const saveImage = async () => {
-  //process.env.BLOB_READ_WRITE_TOKEN = process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN
-console.log(process.env)
+console.log(process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN)
   const base64 = getImage();
 
   // Convert Base64 to Uint8Array (binary)

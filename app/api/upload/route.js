@@ -1,8 +1,6 @@
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
-console.log(process.env.BLOB_READ_WRITE_TOKEN)
-
 async function streamToBuffer(readableStream) {
   const chunks = [];
   for await (const chunk of readableStream) {

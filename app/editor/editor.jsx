@@ -322,30 +322,32 @@ const saveImage = async () => {
 return (
   <div className="flex">
     
-
-    <div className="ml-5 outline">
-      <canvas
-        ref={canvasRef}
-        width={3540}
-        height={3186}
-        style={{ 
-          backgroundColor: 'white',
-          width: '944px',          // CSS scaled-down width
-          height: '849.6px'        // CSS scaled-down height
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      />
+    <div className="flex flex-col items-center">
+      <div className="ml-5 outline">
+        <canvas
+          ref={canvasRef}
+          width={3540}
+          height={3186}
+          style={{ 
+            backgroundColor: 'white',
+            width: '944px',          // CSS scaled-down width
+            height: '849.6px'        // CSS scaled-down height
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        />
+      </div>
+      <p className="text-gray-600">(3540x3186)</p>
     </div>
 
-    <div className="flex flex-col justify-between bg-gray-800 w-[20vw]">
+    <div className="flex flex-col justify-between bg-gray-800 w-[15vw] h-[849.6px] outline">
 
       {/* Images section */}
       <div className="flex flex-col h-full">
       <div className="flex flex-col p-2 overflow-y-auto">
-        <label className="cursor-pointer bg-white hover:bg-blue-600 text-white px-2 rounded text-center">
+        <label className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 px-2 rounded text-center">
             <p className="text-blue-950 font-bold">Add Image</p>
             <input 
                 type="file"
@@ -353,18 +355,21 @@ return (
                 onChange={handleImageUpload}
             />
         </label>
+        <div className="flex flex-col items-start justify-start h-[100px] overflow-y-auto border-l border-r m-2 p-2">
         {images.map(imageObj => (
           <div 
             key={imageObj.id}
-            className={`p-2 text-blue-950 font-bold cursor-pointer mt-2 bg-white ${selectedImageId === imageObj.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-700 text-white'}`}
+            className={`text-white cursor-pointer w-full ${selectedImageId === imageObj.id ? 'font-bold' : ''}`}
             onClick={() => {
               setSelectedImageId(imageObj.id);
               drawImages(imageObj.id);
             }}
           >
-            {imageObj.name}
+            <p className="text-xs">{imageObj.name}</p>
+            <div className='border w-full mt-2 mb-2'></div>
           </div>
         ))}
+        </div>
       </div>
 
       {selectedImageId !== null && (
@@ -376,7 +381,7 @@ return (
       {selectedImageId !== null && (
         <div className="mt-4 flex justify-center h-[4%]">
           <button 
-            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
             onClick={() => changeZIndex(selectedImageId, 1)}>
               <NextImage
                 src={SendFrontIcon}
@@ -385,7 +390,7 @@ return (
               />
           </button>
           <button 
-            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
             onClick={() => changeZIndex(selectedImageId, -1)}>
               <NextImage
                 src={SendBackIcon}
@@ -394,7 +399,7 @@ return (
               />
           </button>
           <button 
-            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
             onClick={() => changeZIndex(selectedImageId, -1)}>
               <NextImage
                 src={UndoIcon}
@@ -403,7 +408,7 @@ return (
               />
           </button>
           <button 
-            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
             onClick={() => changeZIndex(selectedImageId, -1)}>
               <NextImage
                 src={RedoIcon}
@@ -415,7 +420,7 @@ return (
       )}
       </div>
       <div className="flex justify-center">
-      <button className="text-blue-950 font-bold cursor-pointer bg-white hover:bg-blue-600 text-white p-2 rounded text-center mb-4" onClick={saveImage}>
+      <button className="text-blue-950 font-bold cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 p-2 rounded text-center mb-4" onClick={saveImage}>
         <p>Continue</p>
       </button>
       </div>

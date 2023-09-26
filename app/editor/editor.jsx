@@ -6,6 +6,8 @@ import RedoIcon from '../../public/redo.png';
 import SendBackIcon from '../../public/send-back.png';
 import SendFrontIcon from '../../public/send-front.png';
 import NextImage from 'next/image';
+import isEqual from 'lodash/isEqual';
+
 
 
 
@@ -22,7 +24,10 @@ export default function Editor() {
   const [initialScale, setInitialScale] = useState(1);
   const [imageIdCounter, setImageIdCounter] = useState(0);  // Add this to the state
   const [savedURL, setSavedURL] = useState(null);
-
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
+  const [prevImagesState, setPrevImagesState] = useState(null);
+  
   useEffect(() => {
     if (selectedImageId === null) {
       drawImages();
@@ -126,6 +131,7 @@ export default function Editor() {
 
   const handleMouseDown = (event) => {
     const scaleFactor = getScaleFactor();
+    setPrevImagesState(images.map(image => ({ ...image })));
 
     const canvasBounds = canvasRef.current.getBoundingClientRect();
     const mouseX = (event.clientX - canvasBounds.left) / scaleFactor;
@@ -252,7 +258,6 @@ const handleMouseMove = (event) => {
       newImages[clickedImageIndex].scale = scale;
     }
   }
-
   setImages(newImages);
   drawImages();
 };
@@ -260,6 +265,12 @@ const handleMouseMove = (event) => {
   const handleMouseUp = () => {
     setIsDragging(false);
     setSelectedAction(null);
+
+    if (!isEqual(prevImagesState, images)) {
+      setUndoStack([...undoStack, prevImagesState]);
+      setRedoStack([]);
+    }
+
   };
 
 
@@ -316,6 +327,27 @@ const saveImage = async () => {
   console.log(blob);
   setSavedURL(blob);
 };
+
+const handleUndo = () => {
+  if (undoStack.length === 0) return;
+  const prevState = undoStack.pop();
+  console.log(undoStack)
+
+  setRedoStack([...redoStack, images]);
+
+  setImages(prevState);
+  drawImages();
+};
+
+const handleRedo = () => {
+  if (redoStack.length === 0) return;
+
+  const nextState = redoStack.pop();
+  setUndoStack([...undoStack, images]);
+  setImages(nextState);
+  drawImages();
+};
+
 
 
 
@@ -400,7 +432,7 @@ return (
           </button>
           <button 
             className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
-            onClick={() => changeZIndex(selectedImageId, -1)}>
+            onClick={handleUndo}>
               <NextImage
                 src={UndoIcon}
                 height={20}
@@ -409,7 +441,7 @@ return (
           </button>
           <button 
             className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
-            onClick={() => changeZIndex(selectedImageId, -1)}>
+            onClick={handleRedo}>
               <NextImage
                 src={RedoIcon}
                 height={20}

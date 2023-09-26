@@ -1,6 +1,12 @@
 "use client"
 import React, { useState, useRef, useEffect } from "react";
 import { put } from '@vercel/blob';
+import UndoIcon from '../../public/undo.png';
+import RedoIcon from '../../public/redo.png';
+import SendBackIcon from '../../public/send-back.png';
+import SendFrontIcon from '../../public/send-front.png';
+import NextImage from 'next/image';
+
 
 
 import Link from 'next/link';
@@ -23,6 +29,7 @@ export default function Editor() {
     }
   }, [selectedImageId]);
 
+  
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -112,10 +119,17 @@ export default function Editor() {
     });
   };
 
+  const getScaleFactor = () => {
+    const canvas = canvasRef.current;
+    return canvas.clientWidth / canvas.width;
+  }
+
   const handleMouseDown = (event) => {
+    const scaleFactor = getScaleFactor();
+
     const canvasBounds = canvasRef.current.getBoundingClientRect();
-    const mouseX = event.clientX - canvasBounds.left;
-    const mouseY = event.clientY - canvasBounds.top;
+    const mouseX = (event.clientX - canvasBounds.left) / scaleFactor;
+    const mouseY = (event.clientY - canvasBounds.top) / scaleFactor;
   
     const clickedImage = images.find(imageObj => {
       const dx = mouseX - (imageObj.x + imageObj.img.width * 0.5 * imageObj.scale);
@@ -137,6 +151,7 @@ export default function Editor() {
 
     if (clickedImage) {
 
+
         const centerX = clickedImage.x + clickedImage.img.width * 0.5 * clickedImage.scale;
         const centerY = clickedImage.y + clickedImage.img.height * 0.5 * clickedImage.scale;
 
@@ -156,8 +171,10 @@ export default function Editor() {
 
         const scalingHandleDist = Math.sqrt(dxScaleHandle**2 + dyScaleHandle**2);
 
-
-        setDragOffset({ x: mouseX - clickedImage.x, y: mouseY - clickedImage.y });
+        setDragOffset({
+          x: (mouseX - clickedImage.x) * scaleFactor,
+          y: (mouseY - clickedImage.y) * scaleFactor
+        });
 
         setSelectedImageId(clickedImage.id);
         setIsDragging(true);
@@ -196,9 +213,11 @@ export default function Editor() {
 const handleMouseMove = (event) => {
   if (!isDragging || selectedImageId === null) return;
 
+  const scaleFactor = getScaleFactor();
+
   const canvasBounds = canvasRef.current.getBoundingClientRect();
-  const mouseX = event.clientX - canvasBounds.left;
-  const mouseY = event.clientY - canvasBounds.top;
+  const mouseX = (event.clientX - canvasBounds.left) / scaleFactor;
+  const mouseY = (event.clientY - canvasBounds.top) / scaleFactor;
 
   const newImages = [...images];
   const clickedImageIndex = newImages.findIndex(img => img.id === selectedImageId);
@@ -207,8 +226,8 @@ const handleMouseMove = (event) => {
   const centerY = clickedImage.y + clickedImage.img.height * 0.5 * clickedImage.scale;
 
   if (selectedAction === 'move') {
-    const x = event.clientX - canvasBounds.left - dragOffset.x;
-    const y = event.clientY - canvasBounds.top - dragOffset.y;
+    const x = (mouseX - dragOffset.x / scaleFactor);
+    const y = (mouseY - dragOffset.y / scaleFactor);
     newImages[clickedImageIndex].x = x;
     newImages[clickedImageIndex].y = y;
     
@@ -301,13 +320,33 @@ const saveImage = async () => {
 
 
 return (
-  <div className="flex bg-gray-600 outline">
-    <div className="flex flex-col bg-gray-800 w-[20vw]">
+  <div className="flex">
+    
+
+    <div className="ml-5 outline">
+      <canvas
+        ref={canvasRef}
+        width={3540}
+        height={3186}
+        style={{ 
+          backgroundColor: 'white',
+          width: '944px',          // CSS scaled-down width
+          height: '849.6px'        // CSS scaled-down height
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      />
+    </div>
+
+    <div className="flex flex-col justify-between bg-gray-800 w-[20vw]">
 
       {/* Images section */}
+      <div className="flex flex-col h-full">
       <div className="flex flex-col p-2 overflow-y-auto">
-        <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-2 rounded text-center">
-            <p>Add Image</p>
+        <label className="cursor-pointer bg-white hover:bg-blue-600 text-white px-2 rounded text-center">
+            <p className="text-blue-950 font-bold">Add Image</p>
             <input 
                 type="file"
                 className="hidden"
@@ -317,7 +356,7 @@ return (
         {images.map(imageObj => (
           <div 
             key={imageObj.id}
-            className={`p-2 cursor-pointer mt-2 ${selectedImageId === imageObj.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-700 text-white'}`}
+            className={`p-2 text-blue-950 font-bold cursor-pointer mt-2 bg-white ${selectedImageId === imageObj.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-700 text-white'}`}
             onClick={() => {
               setSelectedImageId(imageObj.id);
               drawImages(imageObj.id);
@@ -329,46 +368,58 @@ return (
       </div>
 
       {selectedImageId !== null && (
-        <div className="mt-4 border w-full max-h-[20%] flex justify-center items-center">
-          <img src={images.find(img => img.id === selectedImageId).img.src} alt="Selected" style={{ height: '100%', maxWidth: 'none' }} />
+        <div className="mt-4 w-full max-h-[20%] bg-black flex justify-center items-center">
+          <NextImage src={images.find(img => img.id === selectedImageId).img.src} height={100} width={100} />
         </div>
       )}
 
       {selectedImageId !== null && (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center h-[4%]">
           <button 
-            className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center mr-2" 
-            onClick={() => changeZIndex(selectedImageId, 1)}>Move Forward</button>
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            onClick={() => changeZIndex(selectedImageId, 1)}>
+              <NextImage
+                src={SendFrontIcon}
+                height={20}
+                width={20}
+              />
+          </button>
           <button 
-            className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center" 
-            onClick={() => changeZIndex(selectedImageId, -1)}>Move Backward</button>
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            onClick={() => changeZIndex(selectedImageId, -1)}>
+              <NextImage
+                src={SendBackIcon}
+                height={20}
+                width={20}
+              />
+          </button>
+          <button 
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            onClick={() => changeZIndex(selectedImageId, -1)}>
+              <NextImage
+                src={UndoIcon}
+                height={20}
+                width={20}
+              />
+          </button>
+          <button 
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-white rounded text-center px-2 mr-2" 
+            onClick={() => changeZIndex(selectedImageId, -1)}>
+              <NextImage
+                src={RedoIcon}
+                height={20}
+                width={20}
+              />
+          </button>
         </div>
       )}
-
-
-      <button className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center mt-4" onClick={saveImage}>
-        <p>Save Design</p>
-      </button>
-      {savedURL ? (
-      <div className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-center mt-4">
-        <Link href={`/finalize?image=1`}>Finalize Design</Link>
       </div>
-      ) : (<></>)}
-
-
+      <div className="flex justify-center">
+      <button className="text-blue-950 font-bold cursor-pointer bg-white hover:bg-blue-600 text-white p-2 rounded text-center mb-4" onClick={saveImage}>
+        <p>Continue</p>
+      </button>
+      </div>
     </div>
-    
-    <canvas
-      ref={canvasRef}
-      width={944}
-      height={849.6}
-      style={{ backgroundColor: 'white' }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    />
-
   </div>
 );
 

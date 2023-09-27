@@ -56,11 +56,21 @@ export default function Editor() {
 
     reader.onload = (e) => {
       const img = new Image();
-
       const imgId = imageIdCounter;
       setImageIdCounter(prevId => prevId + 1);
-
+    
       img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+    
+        if (file.type === 'image/svg+xml' && (width === 0 || height === 0 || width === 300 && height === 150)) {
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(e.target.result, 'image/svg+xml');
+          const svgElement = svgDoc.documentElement;
+          width = parseFloat(svgElement.getAttribute('width') || svgElement.viewBox.baseVal.width);
+          height = parseFloat(svgElement.getAttribute('height') || svgElement.viewBox.baseVal.height);
+        }
+    
         setImages([...images, {
           img, 
           x: 0, 
@@ -70,15 +80,20 @@ export default function Editor() {
           selected: false,
           zIndex: images.length,  
           id: imgId,
-          name: file.name  // Save the file name
+          name: file.name,  // Save the file name
+          width: width,    // add these lines
+          height: height   // add these lines
         }]);
         drawImages();
       };
       img.src = e.target.result;
     };
 
+  if(file){
     reader.readAsDataURL(file);
-}
+  }
+
+  }
 
   const drawImages = (currentlySelectedImageId = selectedImageId) => {
     const canvas = canvasRef.current;
@@ -95,11 +110,13 @@ export default function Editor() {
       ctx.translate(centerX, centerY);
       ctx.rotate(imageObj.rotation);
       ctx.scale(imageObj.scale, imageObj.scale);
-      ctx.drawImage(
-        imageObj.img,
-        -imageObj.img.width * 0.5,
-        -imageObj.img.height * 0.5
-      );
+ctx.drawImage(
+  imageObj.img,
+  -imageObj.width * 0.5,   // Modify here
+  -imageObj.height * 0.5, // and here
+  imageObj.width,         // and here
+  imageObj.height         // and here
+);
       
       if (imageObj.id === currentlySelectedImageId) {
         ctx.strokeStyle = 'blue';
@@ -436,15 +453,15 @@ return (
             <p className="text-xs">{imageObj.name}</p>
             <div className='border w-full mt-2 mb-2'></div>
           </div>
-        ))) : (<p className="text-center">No Images</p>)}
+        ))) : (<p className="ml-[33%] text-white">No Images</p>)}
         </div>
       </div>
+      <div className="mt-4 w-full max-h-[20%] bg-black flex justify-center items-center">
+        {selectedImage ? (
+            <NextImage src={selectedImage.img.src} height={100} width={100} />        
+        ) : (<p className="text-center text-white">No Image Selected</p>)}
+      </div>
 
-      {selectedImage ? (
-        <div className="mt-4 w-full max-h-[20%] bg-black flex justify-center items-center">
-          <NextImage src={selectedImage.img.src} height={100} width={100} /> : null
-        </div>
-      ) : (<p className="text-center">No Image Selected</p>)}
 
       
         <div className="mt-4 flex justify-center h-[4%]">

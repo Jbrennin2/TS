@@ -27,6 +27,8 @@ export default function Editor() {
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
   const [prevImagesState, setPrevImagesState] = useState(null);
+  const [triggerDraw, setTriggerDraw] = useState(false);
+
   
   useEffect(() => {
     if (selectedImageId === null) {
@@ -34,7 +36,19 @@ export default function Editor() {
     }
   }, [selectedImageId]);
 
-  
+  useEffect(() => {
+    if (triggerDraw) {
+      drawImages();
+      setTriggerDraw(false); // reset the trigger
+    }
+  }, [images]);
+
+  useEffect(() => {
+    undoStack.forEach((image) => {
+       console.log(image)
+    })
+  }, [undoStack]);
+
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -265,8 +279,7 @@ const handleMouseMove = (event) => {
   const handleMouseUp = () => {
     setIsDragging(false);
     setSelectedAction(null);
-
-    if (!isEqual(prevImagesState, images)) {
+    if (!isEqual(prevImagesState, undoStack[undoStack.length - 1]) && !isEqual(prevImagesState, images) && prevImagesState) {
       setUndoStack([...undoStack, prevImagesState]);
       setRedoStack([]);
     }
@@ -329,14 +342,14 @@ const saveImage = async () => {
 };
 
 const handleUndo = () => {
+  console.log(undoStack.length);
   if (undoStack.length === 0) return;
   const prevState = undoStack.pop();
-  console.log(undoStack)
-
+  console.log(undoStack.length);
   setRedoStack([...redoStack, images]);
 
   setImages(prevState);
-  drawImages();
+  setTriggerDraw(true);
 };
 
 const handleRedo = () => {

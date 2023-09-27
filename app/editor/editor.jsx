@@ -5,12 +5,9 @@ import UndoIcon from '../../public/undo.png';
 import RedoIcon from '../../public/redo.png';
 import SendBackIcon from '../../public/send-back.png';
 import SendFrontIcon from '../../public/send-front.png';
+import TrashIcon from '../../public/trash.svg';
 import NextImage from 'next/image';
 import isEqual from 'lodash/isEqual';
-
-
-
-
 import Link from 'next/link';
 
 export default function Editor() {
@@ -28,6 +25,9 @@ export default function Editor() {
   const [redoStack, setRedoStack] = useState([]);
   const [prevImagesState, setPrevImagesState] = useState(null);
   const [triggerDraw, setTriggerDraw] = useState(false);
+  const selectedImage = images.find(img => img.id === selectedImageId);
+  
+
 
   
   useEffect(() => {
@@ -300,8 +300,16 @@ const handleMouseMove = (event) => {
     newImages[index].zIndex += direction;
     newImages[targetIndex].zIndex -= direction;
 
+    setPrevImagesState(images.map(image => ({ ...image })));
+
+
+    if (!isEqual(prevImagesState, undoStack[undoStack.length - 1]) && !isEqual(prevImagesState, images) && prevImagesState) {
+      setUndoStack([...undoStack, prevImagesState]);
+      setRedoStack([]);
+    }
+
     setImages(newImages);
-    drawImages();
+    setTriggerDraw(true);
 };
 
 const getImage = () => {
@@ -362,6 +370,21 @@ const handleRedo = () => {
 };
 
 
+const deleteImage = () => {
+  if (selectedImageId === null) return;
+
+  // Store current state for undo functionality
+  setUndoStack([...undoStack, images]);
+  setRedoStack([]);  // Clear redo stack since we've made a new change
+
+  const newImages = images.filter(img => img.id !== selectedImageId);
+  setImages(newImages);
+  
+  setSelectedImageId(null);  // Deselect the image
+  setTriggerDraw(true);  // Request a redraw
+};
+
+
 
 
 return (
@@ -401,7 +424,7 @@ return (
             />
         </label>
         <div className="flex flex-col items-start justify-start h-[100px] overflow-y-auto border-l border-r m-2 p-2">
-        {images.map(imageObj => (
+        {images.length ? (images.map(imageObj => (
           <div 
             key={imageObj.id}
             className={`text-white cursor-pointer w-full ${selectedImageId === imageObj.id ? 'font-bold' : ''}`}
@@ -413,17 +436,17 @@ return (
             <p className="text-xs">{imageObj.name}</p>
             <div className='border w-full mt-2 mb-2'></div>
           </div>
-        ))}
+        ))) : (<p className="text-center">No Images</p>)}
         </div>
       </div>
 
-      {selectedImageId !== null && (
+      {selectedImage ? (
         <div className="mt-4 w-full max-h-[20%] bg-black flex justify-center items-center">
-          <NextImage src={images.find(img => img.id === selectedImageId).img.src} height={100} width={100} />
+          <NextImage src={selectedImage.img.src} height={100} width={100} /> : null
         </div>
-      )}
+      ) : (<p className="text-center">No Image Selected</p>)}
 
-      {selectedImageId !== null && (
+      
         <div className="mt-4 flex justify-center h-[4%]">
           <button 
             className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
@@ -461,8 +484,17 @@ return (
                 width={20}
               />
           </button>
+          <button 
+            className="cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 rounded text-center px-2 mr-2" 
+            onClick={deleteImage}>
+              <NextImage
+                src={TrashIcon}
+                height={20}
+                width={20}
+              />
+          </button>
         </div>
-      )}
+      
       </div>
       <div className="flex justify-center">
       <button className="text-blue-950 font-bold cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 p-2 rounded text-center mb-4" onClick={saveImage}>

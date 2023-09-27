@@ -10,7 +10,7 @@ import NextImage from 'next/image';
 import isEqual from 'lodash/isEqual';
 import Link from 'next/link';
 
-export default function Editor() {
+export default function Editor({setEditor, setPreview, setImageState}) {
   const canvasRef = useRef(null);
   const [images, setImages] = useState([]);
   const [selectedImageId, setSelectedImageId] = useState(null);
@@ -25,6 +25,7 @@ export default function Editor() {
   const [redoStack, setRedoStack] = useState([]);
   const [prevImagesState, setPrevImagesState] = useState(null);
   const [triggerDraw, setTriggerDraw] = useState(false);
+  const [savedImage, setSavedImage] = useState(null);
   const selectedImage = images.find(img => img.id === selectedImageId);
   
 
@@ -342,6 +343,7 @@ const getImage = () => {
 const saveImage = async () => {
   const base64 = getImage();
 
+  setSavedImage(base64);
   // Convert Base64 to Uint8Array (binary)
   const byteCharacters = atob(base64);
   const byteNumbers = new Array(byteCharacters.length);
@@ -400,6 +402,13 @@ const deleteImage = () => {
   setSelectedImageId(null);  // Deselect the image
   setTriggerDraw(true);  // Request a redraw
 };
+
+const handleContinue = () => {
+  const base64 = getImage();
+  setImageState(base64);
+  setEditor(false);
+  setPreview(true);
+}
 
 
 
@@ -514,7 +523,7 @@ return (
       
       </div>
       <div className="flex justify-center">
-      <button className="text-blue-950 font-bold cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 p-2 rounded text-center mb-4" onClick={saveImage}>
+      <button className="text-blue-950 font-bold cursor-pointer bg-white hover:border-2 hover:border-blue-400 text-blue-950 p-2 rounded text-center mb-4" onClick={handleContinue}>
         <p>Continue</p>
       </button>
       </div>

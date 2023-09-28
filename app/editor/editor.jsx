@@ -1,6 +1,5 @@
 "use client"
 import React, { useState, useRef, useEffect } from "react";
-import { put } from '@vercel/blob';
 import UndoIcon from '../../public/undo.png';
 import RedoIcon from '../../public/redo.png';
 import SendBackIcon from '../../public/send-back.png';
@@ -340,33 +339,7 @@ const getImage = () => {
   return base64Image;
 };
 
-const saveImage = async () => {
-  const base64 = getImage();
 
-  setSavedImage(base64);
-  // Convert Base64 to Uint8Array (binary)
-  const byteCharacters = atob(base64);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-
-  // POST the binary data to /api/upload
-  const response = await fetch(`/api/upload?filename=my-image.png`, {
-    method: 'POST',
-    body: byteArray.buffer,
-    headers: {
-      'Content-Type': 'application/octet-stream'
-    }
-  });
-
-  const blob = await response.json();
-  
-  // Set the saved URL
-  console.log(blob);
-  setSavedURL(blob);
-};
 
 const handleUndo = () => {
   console.log(undoStack.length);

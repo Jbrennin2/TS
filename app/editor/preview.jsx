@@ -3,6 +3,8 @@ import Editor from "./editor"
 import Header from "../components/header"
 import {useState} from 'react';
 import NextImage from "next/image";
+import Link from 'next/link'
+
 export default function Preview({imageState, savedUrl}) {
 
     const [renders, setRenders] = useState(null);
@@ -65,8 +67,17 @@ export default function Preview({imageState, savedUrl}) {
                 <button onClick={saveImage} className="text-xl text-center rounded bg-blue-400 hover:bg-blue-600 p-5">Confirm Image</button>
 
             ) : (
-                <button onClick={continueCheckout} className="text-xl text-center rounded bg-blue-400 hover:bg-blue-600 p-5">Checkout</button>
-            )}
+            <Link
+                href={{
+                    pathname: `/checkout`,
+                    query: {
+                    id: savedURL, // pass the id 
+                    },
+                }}
+            >
+                Checkout
+            </Link>            
+        )}
             </div>
         </div> 
     )

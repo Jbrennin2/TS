@@ -11,6 +11,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 export async function POST(req) {
   console.log('WEBHOOK HIT')
   const sig = req.headers['stripe-signature'];
+  console.log('sig made')
   const buf = await buffer(req);
 console.log('buff made')
   let event;

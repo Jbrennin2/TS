@@ -7,11 +7,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 async function handleWebhookEvent(req, res) {
   const sig = req.headers['stripe-signature'];
@@ -30,7 +25,6 @@ async function handleWebhookEvent(req, res) {
     case 'checkout.session.completed':
       const session = event.data.object;
       console.log(`Payment successful for session ID: ${session.id}`);
-      // Handle post-payment actions here
       break;
 
     // Add other event types to handle as needed

@@ -1,43 +1,32 @@
-import Stripe from 'stripe';
-import { buffer } from 'micro';
-import { NextResponse } from 'next/server';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2020-08-27',
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+import { NextResponse } from "next/server";
+import { buffer } from "node:stream/consumers";
 
 export async function POST(req) {
-  console.log('WEBHOOK HIT')
-  const sig = req.headers['stripe-signature'];
-  console.log('sig made')
-  const buf = await buffer(req.body);
-console.log('buff made')
+  console.log('hit POST')
+  const rawBody = await buffer(req.body);
+  console.log('got body')
   let event;
-
   try {
-    console.log('making event')
-    event = stripe.webhooks.constructEvent(buf.toString(), sig, webhookSecret);
-    console.log('even made')
-    console.log('hit try')
+    event = stripe.webhooks.constructEvent(
+      rawBody,
+      req.headers.get("stripe-signature") ,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (err) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
-    return NextResponse.json(`Webhook signature verification failed: ${err.message}`);
+    console.log(err);
+    return NextResponse.json(
+      {
+        message: "Webhook signature verification failed",
+      },
+      {
+        status: 400,
+      }
+    );
   }
-
-  switch (event.type) {
-    case 'checkout.session.completed':
-      const session = event.data.object;
-      console.log(`Payment successful for session ID: ${session.id}`);
-      break;
-
-    // Add other event types to handle as needed
-
-    default:
-      console.warn(`Unhandled event type: ${event.type}`);
-  }
-
-  NextResponse.json('done')
+ // have to return response promptly, ie without waiting for back-end process or stripe will potentially flag your account
+  handleWebhook(event);
+  return NextResponse.json(
+    { message: "successfully received" },
+    { status: 200 }
+  );
 }
-

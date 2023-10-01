@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { buffer } from "node:stream/consumers";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2020-08-27',
+});
 
 export async function POST(req) {
-  console.log('hit POST')
+  console.log()
   const rawBody = await buffer(req.body);
   console.log('got body')
   let event;

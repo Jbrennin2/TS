@@ -12,7 +12,7 @@ export async function POST(req) {
   console.log('WEBHOOK HIT')
   const sig = req.headers['stripe-signature'];
   console.log('sig made')
-  const buf = await buffer(req);
+  const buf = await buffer(req.body);
 console.log('buff made')
   let event;
 

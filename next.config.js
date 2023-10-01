@@ -1,4 +1,14 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+    reactStrictMode: true,
+    api: {
+      customResolvers: {
+        '/api/webhooks': {
+          bodyParser: false,
+        },
+      }
+    }
+}
+
 
 module.exports = nextConfig

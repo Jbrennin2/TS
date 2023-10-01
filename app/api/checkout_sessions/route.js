@@ -1,8 +1,10 @@
 import Stripe from "stripe";
+import { NextResponse } from 'next/server';
+
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export default async function handler(req, res) {
+export default async function POST(request) {
   if (req.method === "POST") {
     try {
       const session = await stripe.checkout.sessions.create({
@@ -23,10 +25,10 @@ export default async function handler(req, res) {
         success_url: `${req.headers.origin}/success`,
         cancel_url: `${req.headers.origin}/`,
       });
+      return NextResponse.json({ sessionId: session.id }, { status: 200 });
 
-      res.status(200).json({ sessionId: session.id });
     } catch (err) {
-      res.status(500).json({ error: "Error creating checkout session" });
+    return NextResponse.json({ error }, { status: 500 });
     }
   } else {
     res.setHeader("Allow", "POST");

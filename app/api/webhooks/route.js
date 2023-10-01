@@ -7,9 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 export async function POST(req) {
-  console.log()
   const rawBody = await buffer(req.body);
-  console.log('got body')
   let event;
   try {
     event = stripe.webhooks.constructEvent(
@@ -17,6 +15,7 @@ export async function POST(req) {
       req.headers.get("stripe-signature") ,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+    console.log(event);
   } catch (err) {
     console.log(err);
     return NextResponse.json(

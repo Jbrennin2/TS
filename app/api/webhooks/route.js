@@ -6,13 +6,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2020-08-27',
 });
 
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}
-
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 

@@ -28,8 +28,6 @@ export async function POST(req) {
       }
     );
   }
- // have to return response promptly, ie without waiting for back-end process or stripe will potentially flag your account
-  handleWebhook(event);
   return NextResponse.json(
     { message: "successfully received" },
     { status: 200 }

@@ -110,13 +110,13 @@ export default function Editor({setEditor, setPreview, setImageState}) {
       ctx.translate(centerX, centerY);
       ctx.rotate(imageObj.rotation);
       ctx.scale(imageObj.scale, imageObj.scale);
-ctx.drawImage(
-  imageObj.img,
-  -imageObj.width * 0.5,   // Modify here
-  -imageObj.height * 0.5, // and here
-  imageObj.width,         // and here
-  imageObj.height         // and here
-);
+      ctx.drawImage(
+        imageObj.img,
+        -imageObj.width * 0.5,   // Modify here
+        -imageObj.height * 0.5, // and here
+        imageObj.width,         // and here
+        imageObj.height         // and here
+      );
       
       if (imageObj.id === currentlySelectedImageId) {
         ctx.strokeStyle = 'blue';

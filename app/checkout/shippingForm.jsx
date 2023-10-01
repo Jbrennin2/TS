@@ -122,8 +122,8 @@ export default function ShippingForm ({ImageUrl, setPayment}) {
                       className="border rounded mb-2 p-4"
                       onChange={handleChange}>
                         <option value="personal">Select Country</option>
-                        {countries.map((country) => {
-                          return <option value={country.Code}>{country.Name}</option>
+                        {countries.map((country, i) => {
+                          return <option key={i} value={country.Code}>{country.Name}</option>
                         })}
                       </select>
                     <input

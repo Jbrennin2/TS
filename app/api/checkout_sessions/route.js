@@ -15,7 +15,7 @@ export async function POST(req) {
       {price: "price_1NwBImLSbyqQ9JQPRkK9ufLz", quantity: 1},
     ],
     mode: 'payment',
-    metadata: {'order_id': '1'},
+    client_reference_id: 1,
   });
       console.log(session.id)
       return NextResponse.json({ sessionId: session.id }, { status: 200 });

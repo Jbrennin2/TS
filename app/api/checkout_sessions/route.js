@@ -6,7 +6,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(req) {
 
-  console.log("hit", req.body)
+  const data = await req.json();
+
   if (req.method === "POST") {
     try {
   const session = await stripe.checkout.sessions.create({
@@ -15,7 +16,7 @@ export async function POST(req) {
       {price: "price_1NwBImLSbyqQ9JQPRkK9ufLz", quantity: 1},
     ],
     mode: 'payment',
-    metadata: {'order_id': '1'},
+    metadata: {'order_id': data.orderId},
   });
       console.log(session.id)
       return NextResponse.json({ sessionId: session.id }, { status: 200 });
@@ -24,7 +25,6 @@ export async function POST(req) {
     return NextResponse.json({ error }, { status: 500 });
     }
   } else {
-    console.log(req.method)
     res.setHeader("Allow", "POST");
     res.status(405).end("Method Not Allowed");
   }

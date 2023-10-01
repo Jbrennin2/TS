@@ -5,7 +5,7 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
-export default function CheckoutButton () {
+export default function CheckoutButton ({orderId}) {
   const router = useRouter();
   
   const handleCheckout = async () => {
@@ -16,6 +16,7 @@ export default function CheckoutButton () {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ orderId: orderId })
       });
 
       const { sessionId } = await response.json();

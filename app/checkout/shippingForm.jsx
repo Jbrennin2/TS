@@ -2,9 +2,8 @@ import { useState } from 'react'
 import countries from '../JSON/countries.json'
 
 
-export default function ShippingForm ({ImageUrl, setPayment}) {
+export default function ShippingForm ({ImageUrl, setOrderId}) {
     const [page, setPage] = useState('personal')
-  console.log(setPayment)
 
     const [formData, setFormData] = useState({
       firstName: '',
@@ -19,13 +18,11 @@ export default function ShippingForm ({ImageUrl, setPayment}) {
       countryCode: '',
       address2: '',
       company: '',
-      quantity: '',
+      quantity: '1',
       lineItemPrintUrl: ImageUrl
     });
   
-    const placeOrder = async (event) => {
-      event.preventDefault(); // To prevent form from actually submitting to a page
-  
+    const placeOrder = async (event) => {  
       try {
         const response = await fetch('/api/create-order', { // replace with your API endpoint
           method: 'POST',
@@ -36,6 +33,7 @@ export default function ShippingForm ({ImageUrl, setPayment}) {
         });
         
         const data = await response.json();
+        setOrderId(data.orderId);
       } catch (error) {
         console.log(error);
       }
@@ -48,7 +46,7 @@ export default function ShippingForm ({ImageUrl, setPayment}) {
       } else if (page ==='shipping') {
         setPage('payment')
       } else {
-        setPayment(true);
+        placeOrder();
       }
     }
   
@@ -145,11 +143,20 @@ export default function ShippingForm ({ImageUrl, setPayment}) {
                         onChange={handleChange}
                     />
                     <input
+                        key="zipCode"
+                        type='text'
+                        name="zipCode"
+                        placeholder="Zipcode"
+                        value={formData["zipCode"]}
+                        className="border rounded mb-2 p-4"
+                        onChange={handleChange}
+                    />
+                    <input
                         key="address1"
                         type='text'
                         name="address1"
                         placeholder="Street Address Line 1"
-                        value={formData["city"]}
+                        value={formData["address1"]}
                         className="border rounded mb-2 p-4"
                         onChange={handleChange}
                     />    

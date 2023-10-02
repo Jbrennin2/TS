@@ -4,23 +4,68 @@ import countries from '../JSON/countries.json'
 
 export default function ShippingForm ({ImageUrl, setOrderId}) {
     const [page, setPage] = useState('personal')
-
+    const [error, setError] = useState("");
+    const [personalError, setPersonalError] = useState("");
     const [formData, setFormData] = useState({
-      firstName: '',
-      lastName: '',
-      email: '',
-      address1: '',
-      phone: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      //province: '',
-      countryCode: '',
-      address2: '',
-      company: '',
-      quantity: '1',
+      firstName: '', //required
+      lastName: '', //required
+      email: '',  //required
+      address1: '',  //required
+      phone: '',   //optional
+      city: '',   //required
+      state: '',  //required
+      zipCode: '',  //required
+      countryCode: '',  //required
+      address2: '', //optional
+      company: '', //optional
+      quantity: '1', //preset
       lineItemPrintUrl: ImageUrl
     });
+
+    const validateForm = () => {
+      if (!formData.countryCode) {
+        setError("Country is required");
+        return false;
+      }
+      if (!formData.state) {
+        setError("State is required");
+        return false;
+      }
+      if (!formData.city) {
+        setError("City is required");
+        return false;
+      }
+      if (!formData.zipCode) {
+        setError("Zip code is required");
+        return false;
+      }
+      if (!formData.address1) {
+          setError("Address line 1 is required");
+          return false;
+      }      
+     
+      setError("");
+      return true;
+  }
+
+  const validatePersonalForm = () => {
+    console.log('hit')
+    if (!formData.firstName) {
+      console.log('hit')
+        setPersonalError("First name is required");
+        return false;
+    }
+    if (!formData.lastName) {
+        setPersonalError("Last name is required");
+        return false;
+    }
+    if (!formData.email) {
+        setPersonalError("Email is required");
+        return false;
+    }
+    setPersonalError("");
+    return true;
+  }
   
     const placeOrder = async (event) => {  
       try {
@@ -40,15 +85,22 @@ export default function ShippingForm ({ImageUrl, setOrderId}) {
     }
 
     const submitPage = (e) => {
-      e.preventDefault()
-      if(page === 'personal') {
-        setPage('shipping')
-      } else if (page ==='shipping') {
-        setPage('payment')
+      e.preventDefault();
+  
+      if (page === 'personal') {
+          if (!validatePersonalForm()) {
+            return;
+          }
+          setPage('shipping');
+      } else if (page === 'shipping') {
+          if (!validateForm()) {
+            return;
+          }
+          setPage('payment');
       } else {
-        placeOrder();
+          placeOrder();
       }
-    }
+  }
   
     const handleChange = (event) => {
       const { name, value } = event.target;
@@ -63,6 +115,7 @@ export default function ShippingForm ({ImageUrl, setOrderId}) {
                 <div className="flex flex-col  justify-center w-full">
                   {page==='personal' ? (<>
                     <h1 className="mb-2">Personal</h1>
+                    {personalError && <p className="text-red-500 mb-2">{personalError}</p>}
                     <input
                         key="firstName"
                         type='text'
@@ -111,6 +164,8 @@ export default function ShippingForm ({ImageUrl, setOrderId}) {
                     </>  ) : page==='shipping' ? (
                     <>
                     <h1 className="mb-2">Shipping</h1>
+                    {error && <p className="text-red-500 mb-2">{error}</p>}
+
                       <select
                       key="countryCode"
                       type='text'

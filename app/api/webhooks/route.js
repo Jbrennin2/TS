@@ -15,6 +15,8 @@ export async function POST(req) {
       req.headers.get("stripe-signature") ,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+    console.log(event);
+    console.log(event.object)
     const id = event.object.metadata.order_id;
     const status = 'paid'
 
@@ -54,8 +56,4 @@ export async function POST(req) {
       }
     );
   }
-  return NextResponse.json(
-    { message: "successfully received" },
-    { status: 200 }
-  );
 }

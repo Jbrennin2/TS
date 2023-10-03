@@ -26,7 +26,8 @@ export async function POST(request) {
     company, 
     countryCode, 
     quantity, 
-    lineItemPrintUrl
+    lineItemPrintUrl,
+    status,
   } = parsedObject; 
 
 
@@ -34,17 +35,15 @@ export async function POST(request) {
 
   try {
     if (!email || !quantity || !firstName || !lastName || !address1 || !city || !zipCode || !countryCode || !lineItemPrintUrl) throw new Error('Missing required fields');
-    const result = await sql`INSERT INTO Orders (Firstname, Lastname, Email, Address1, Phone, City, State, Zipcode, Province, Province_code, Address2, Company, Country, Country_code, Quantity, Price, Line_item_print_url) VALUES (
+    const result = await sql`INSERT INTO Orders (Firstname, Lastname, Email, Address1, Phone, City, State, Zipcode, Province, Province_code, Address2, Company, Country, Country_code, Quantity, Price, Line_item_print_url, Status) VALUES (
       ${firstName}, ${lastName}, 
       ${email}, ${address1}, ${phone}, 
       ${city}, ${state}, ${zipCode}, ${province}, 
       ${provinceCode}, ${address2}, 
       ${company}, ${country}, ${countryCode},
-      ${quantity}, ${price}, ${lineItemPrintUrl}) RETURNING id;`;
-      console.log(result);
+      ${quantity}, ${price}, ${lineItemPrintUrl}, ${status}) RETURNING id;`;
 
       const insertedOrderId = result.rows[0].id;
-      console.log(insertedOrderId);
       return NextResponse.json({ orderId: insertedOrderId }, { status: 200 });
 
   } catch (error) {

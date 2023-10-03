@@ -25,7 +25,8 @@ export async function GET(request) {
         sku varchar(255), 
         quantity integer,
         price varchar(255), 
-        line_item_print_url varchar(255)
+        line_item_print_url varchar(255),
+        status varchar(255)
         );`;
 
     return NextResponse.json({ result }, { status: 200 });

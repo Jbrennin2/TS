@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import countries from '../JSON/countries.json'
+import CheckoutButton from './checkoutButton'
 
-
-export default function ShippingForm ({ImageUrl, setOrderId}) {
+export default function ShippingForm ({ImageUrl}) {
+    const [orderId, setOrderId] = useState(null)
     const [page, setPage] = useState('personal')
     const [error, setError] = useState("");
     const [personalError, setPersonalError] = useState("");
@@ -228,10 +229,15 @@ export default function ShippingForm ({ImageUrl, setOrderId}) {
                   ): (<></>)}
                 </div>
               </div>
+              {orderId ? (
+                <CheckoutButton orderId={orderId}/>
+              ): (
               <button 
                 className="px-2 py-2 bg-white shadow-lg border rounded text-center"
                 type="submit">Continue
               </button>
+              )}
+              
             </div>
           </form>
         </div>

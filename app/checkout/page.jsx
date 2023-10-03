@@ -23,7 +23,6 @@ export default function Checkout() {
       (<div>
         <h1>Sample Product</h1>
         <p>Price: $10.00</p>
-        <CheckoutButton orderId={orderId}/>
       </div>)
       }
     </div>

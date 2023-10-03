@@ -15,8 +15,34 @@ export async function POST(req) {
       req.headers.get("stripe-signature") ,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-    const order_id = event.object.metadata.order_id;
-    console.log(event.object.metadata.order_id);
+    const id = event.object.metadata.order_id;
+    const status = 'paid'
+
+    const query = sql`
+      UPDATE orders
+      SET status = $1
+      WHERE id = $2
+    `;
+  
+    const result = await query(status, id);
+  
+    if (result.rowCount === 0) {
+      return new NextResponse(404, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: "Order not found" }),
+      });
+    }
+  
+    return new NextResponse(200, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: "Order status updated successfully" }),
+    });
+
+
   } catch (err) {
     console.log(err);
     return NextResponse.json(

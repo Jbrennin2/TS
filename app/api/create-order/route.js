@@ -1,4 +1,5 @@
 import { sql } from '@vercel/postgres';
+import { pipeReadable } from 'next/dist/server/pipe-readable';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
@@ -9,7 +10,9 @@ export async function POST(request) {
 
   const parsedObject = await request.json();
   console.log(parsedObject);
-  
+
+  const status = "unpaid"
+
   const {
     firstName, 
     lastName, 
@@ -26,8 +29,7 @@ export async function POST(request) {
     company, 
     countryCode, 
     quantity, 
-    lineItemPrintUrl,
-    status,
+    lineItemPrintUrl
   } = parsedObject; 
 
 

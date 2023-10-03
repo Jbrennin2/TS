@@ -11,7 +11,7 @@ export default function Page() {
 
     return (
         <div className="flex flex-col items-center justify-evenly min-h-screen bg-gray-100">
-            <Header/>
+            {/**<Header /> */}
             {editor ? <Editor setEditor={setEditor} setPreview={setPreview} setImageState={setImageState}/> : null}
             {preview ? <Preview imageState={imageState}/> : null}
         </div> 

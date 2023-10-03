@@ -15,8 +15,8 @@ export default function Home() {
   const [banner, setBanner] = useState(true)
 
   return (
-    <main className="flex flex-col items-center justify-evenly min-h-screen bg-gray-100">
-      <Header/>
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      {/**<Header /> */}
       {banner ? <Banner setEditor={setEditor} editor={editor} setBanner={setBanner} banner={banner} /> : <></>}
     </main>
   )

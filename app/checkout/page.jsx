@@ -14,8 +14,8 @@ export default function Checkout() {
   return (
     <div className="flex items-center min-h-screen justify-center">
       {!orderId ? (<>
-      <Header />
-      <div className="flex flex-col h-full min-h-screen max-w-[1000px] w-full p-8">
+      {/**<Header /> */}
+      <div className="flex flex-col h-full min-h-screen max-w-[1000px] w-full p-8 justify-center">
         <OrderInfo ImageUrl={ImageUrl}/>
         <ShippingForm ImageUrl={ImageUrl} setOrderId={setOrderId}/>
       </div>  

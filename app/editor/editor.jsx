@@ -248,6 +248,7 @@ export default function Editor({setEditor, setPreview, setImageState}) {
 
 
 const handleMouseMove = (event) => {
+  event.preventDefault();
   if (!isDragging || selectedImageId === null) return;
 
   const scaleFactor = getScaleFactor();
@@ -277,6 +278,7 @@ const handleMouseMove = (event) => {
   } else if (selectedAction === 'resize') {
     const dx = mouseX - centerX;
     const dy = mouseY - centerY;
+    if (dx < 0 || dy < 0) return;
     const currentDiagonalDistance = Math.sqrt(dx**2 + dy**2);
     
     const originalDistanceX = clickedImage.img.width * 0.5 * initialScale;
@@ -409,7 +411,7 @@ return (
       <p className="text-gray-600">(3540x3186)</p>
     </div>
 
-    <div className="flex flex-col justify-between bg-gray-800 w-[15vw] h-[849.6px] outline">
+    <div className="flex flex-col justify-between bg-blue-300 w-[15vw] h-[849.6px] outline">
 
       {/* Images section */}
       <div className="flex flex-col h-full">

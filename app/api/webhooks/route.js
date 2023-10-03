@@ -15,7 +15,8 @@ export async function POST(req) {
       req.headers.get("stripe-signature") ,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-    console.log(event);
+    const order_id = event.object.metadata.order_id;
+    console.log(event.object.metadata.order_id);
   } catch (err) {
     console.log(err);
     return NextResponse.json(

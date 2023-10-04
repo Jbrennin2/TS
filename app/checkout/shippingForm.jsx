@@ -23,6 +23,8 @@ export default function ShippingForm ({ImageUrl}) {
       lineItemPrintUrl: ImageUrl
     });
 
+    const [loading, setLoading] = useState(false);
+
     const validateForm = () => {
       if (!formData.countryCode) {
         setError("Country is required");
@@ -70,6 +72,7 @@ export default function ShippingForm ({ImageUrl}) {
   
     const placeOrder = async (event) => {  
       try {
+        setLoading(true);
         const response = await fetch('/api/create-order', { // replace with your API endpoint
           method: 'POST',
           headers: {
@@ -80,6 +83,7 @@ export default function ShippingForm ({ImageUrl}) {
         
         const data = await response.json();
         setOrderId(data.orderId);
+        setLoading(false)
       } catch (error) {
         console.log(error);
       }
@@ -232,10 +236,14 @@ export default function ShippingForm ({ImageUrl}) {
               {orderId ? (
                 <CheckoutButton orderId={orderId}/>
               ): (
-              <button 
+                page === 'payment'? (
+                  loading ? (<></>) : (<button onClick={placeOrder}>Place Order</button>)   
+                ) : (<>
+                  <button 
                 className="px-2 py-2 bg-white shadow-lg border rounded text-center"
                 type="submit">Continue
-              </button>
+                  </button>
+                </>)
               )}
               
             </div>

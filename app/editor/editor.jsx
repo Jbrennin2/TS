@@ -84,7 +84,7 @@ export default function Editor({setEditor, setPreview, setImageState}) {
           width: width,    // add these lines
           height: height   // add these lines
         }]);
-        drawImages();
+        setTriggerDraw(true);
       };
       img.src = e.target.result;
     };

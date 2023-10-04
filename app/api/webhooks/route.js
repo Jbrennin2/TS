@@ -29,6 +29,8 @@ export async function POST(req) {
     `;
   
     const result = await query(status, id);
+
+    console.log(result)
   
     if (result.rowCount === 0) {
       return new NextResponse(404, {

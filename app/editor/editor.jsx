@@ -24,11 +24,21 @@ export default function Editor({setEditor, setPreview, setImageState}) {
   const [redoStack, setRedoStack] = useState([]);
   const [prevImagesState, setPrevImagesState] = useState(null);
   const [triggerDraw, setTriggerDraw] = useState(false);
-  const [savedImage, setSavedImage] = useState(null);
+  const [saveImage, setSaveImage] = useState(false);
   const selectedImage = images.find(img => img.id === selectedImageId);
   
 
 
+  useEffect(() => {
+    if(saveImage) {
+      drawImages();
+      const base64 = getImage();
+      setImageState(base64);
+      setEditor(false);
+      setPreview(true);
+    }
+    setSaveImage(false);
+  }, [saveImage])
   
   useEffect(() => {
     if (selectedImageId === null) {
@@ -379,10 +389,8 @@ const deleteImage = () => {
 };
 
 const handleContinue = () => {
-  const base64 = getImage();
-  setImageState(base64);
-  setEditor(false);
-  setPreview(true);
+  setSelectedImageId(null);
+  setSaveImage(true);
 }
 
 

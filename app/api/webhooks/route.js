@@ -16,16 +16,14 @@ export async function POST(req) {
       rawBody,
       req.headers.get("stripe-signature") ,
       process.env.STRIPE_WEBHOOK_SECRET
-    );
-    console.log(event.data.object.metadata);
-    
+    );    
     const id = event.data.object.metadata.order_id;
     const status = 'paid'
 
     const query = await sql`
       UPDATE orders
-      SET status = $1
-      WHERE id = $2
+      SET status = ${status}
+      WHERE id = ${id}
     `;
   
     console.log(query)

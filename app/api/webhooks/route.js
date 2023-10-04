@@ -22,15 +22,13 @@ export async function POST(req) {
     const id = event.data.object.metadata.order_id;
     const status = 'paid'
 
-    const query = sql`
+    const query = await sql`
       UPDATE orders
       SET status = $1
       WHERE id = $2
     `;
   
-    const result = await query(status, id);
-
-    console.log(result)
+    console.log(query)
   
     if (result.rowCount === 0) {
       return new NextResponse(404, {

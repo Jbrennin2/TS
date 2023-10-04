@@ -17,7 +17,7 @@ export async function POST(req) {
       req.headers.get("stripe-signature") ,
       process.env.STRIPE_WEBHOOK_SECRET
     );
-    console.log(event);
+    console.log(event.data.object.metadata);
     
     const id = event.data.object.metadata.order_id;
     const status = 'paid'

@@ -398,7 +398,6 @@ const handleContinue = () => {
 
 return (
   <div className="flex">
-    
     <div className="flex flex-col items-center">
       <div className="ml-5 outline">
         <canvas
@@ -406,7 +405,6 @@ return (
           width={3540}
           height={3186}
           style={{ 
-            backgroundColor: 'white',
             width: '944px',          // CSS scaled-down width
             height: '849.6px'        // CSS scaled-down height
           }}
@@ -419,7 +417,7 @@ return (
       <p className="text-gray-600">(3540x3186)</p>
     </div>
 
-    <div className="flex flex-col justify-between bg-blue-300 w-[15vw] h-[849.6px] outline">
+    <div className="flex flex-col justify-between bg-blue-950 w-[15vw] h-[849.6px] outline">
 
       {/* Images section */}
       <div className="flex flex-col h-full">

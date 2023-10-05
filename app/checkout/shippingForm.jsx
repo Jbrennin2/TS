@@ -176,7 +176,7 @@ export default function ShippingForm ({ImageUrl}) {
                       type='text'
                       name="countryCode"
                       placeholder="Country"
-                      value={formData["firstName"]}
+                      value={formData["country"]}
                       className="border rounded mb-2 p-4"
                       onChange={handleChange}>
                         <option value="personal">Select Country</option>
@@ -204,7 +204,7 @@ export default function ShippingForm ({ImageUrl}) {
                     />
                     <input
                         key="zipCode"
-                        type='text'
+                        type='number'
                         name="zipCode"
                         placeholder="Zipcode"
                         value={formData["zipCode"]}

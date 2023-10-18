@@ -1,7 +1,7 @@
 "use client"
 import Image from 'next/image'
 import Header from './components/header'
-import Banner from './components/banner'
+import ProductDisplayPage from './components/productDisplayPage'
 import { useState } from 'react'
 import { useRouter } from 'next/router';
 
@@ -11,15 +11,15 @@ export default function Home() {
 
   const [header, setHeader] = useState(false)
 
-  const [banner, setBanner] = useState(true)
-
   const [headerSticky, setHeaderSticky] = useState(false);
 
 
   return (
-    <main className="flex flex-col min-h-[3000px] bg-gray-100">
+    <main className="h-full w-full">
       {/**<Header /> */}
-      {banner ? <Banner setEditor={setEditor} editor={editor} setBanner={setBanner} banner={banner} setHeaderSticky={setHeaderSticky} headerSticky={headerSticky}/> : <></>}
+      <div className=" overflow-y-hidden flex flex-col justify-start items-center min-h-[3000px] bg-white ">
+        <ProductDisplayPage />
+      </div>
     </main>
   )
 }
